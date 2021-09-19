@@ -5,11 +5,11 @@ import "./list.css";
 const API = "https://www.omdbapi.com/?i=tt3896198&apikey=26d49381";
 
 const List = () => {
-  // Declara una nueva variable de estado, la cual llamaremos “count”
   const [movie, setMovie] = useState({
     data: [],
     searchTerm: "",
     error: "",
+    noResults: false,
   });
   const callApi = async () => {
     const res = await fetch(`${API}&s=batman`);
@@ -27,13 +27,14 @@ const List = () => {
         const data = await response.json();
 
         if (!data.Search) {
-          return setMovie({ ...movie, error: "There are no results." });
+          return setMovie({ ...movie, noResults: true });
         }
 
         return setMovie({
           data: data.Search,
           searchTerm: "",
           error: "",
+          noResults: false,
         });
       }
     }
@@ -42,6 +43,23 @@ const List = () => {
   useEffect(() => {
     callApi();
   }, []);
+
+  const noResults = () => {
+    return (
+      <div className="text-center mt-10">
+        <h1 className="font-bold text-4xl">No search results found...</h1>
+      </div>
+    );
+  };
+  const movieCards = () => {
+    return (
+      <div className="movie-container grid grid-cols-3 gap-5">
+        {movie.data.map((movie, i) => (
+          <Card movie={movie} key={i} />
+        ))}
+      </div>
+    );
+  };
 
   return (
     <>
@@ -56,11 +74,7 @@ const List = () => {
         <p className="text-white">{movie.error ? movie.error : ""}</p>
       </div>
       <div className="containers my-6">
-        <div className="movie-container grid grid-cols-3 gap-5">
-          {movie.data.map((movie, i) => (
-            <Card movie={movie} key={i} />
-          ))}
-        </div>
+        {movie.noResults ? noResults() : movieCards()}
       </div>
     </>
   );
